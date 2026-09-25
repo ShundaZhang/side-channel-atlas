@@ -17,6 +17,7 @@ function initTimingModel() {
   if (!noise || !threshold) return;
   const hitBar = document.getElementById("hit-bar");
   const missBar = document.getElementById("miss-bar");
+  const histogram = document.getElementById("histogram");
   const readout = document.getElementById("timing-readout");
 
   function render() {
@@ -31,10 +32,14 @@ function initTimingModel() {
       return (seed >>> 0) / 4294967296;
     };
     let correct = 0, hitSum = 0, missSum = 0;
+    const hitBins = Array(14).fill(0);
+    const missBins = Array(14).fill(0);
     for (let i = 0; i < 100; i++) {
       const hit = Math.max(10, 80 + (random() + random() + random() - 1.5) * n * 1.9);
       const miss = Math.max(10, 160 + (random() + random() + random() - 1.5) * n * 1.9);
       hitSum += hit; missSum += miss;
+      hitBins[Math.min(13, Math.floor(hit / 20))]++;
+      missBins[Math.min(13, Math.floor(miss / 20))]++;
       if (hit < t) correct++;
       if (miss >= t) correct++;
     }
@@ -42,6 +47,20 @@ function initTimingModel() {
     const missAvg = Math.round(missSum / 100);
     hitBar.style.height = String(Math.min(95, hitAvg / 200 * 100)) + "%";
     missBar.style.height = String(Math.min(95, missAvg / 200 * 100)) + "%";
+    const maxCount = Math.max(...hitBins, ...missBins, 1);
+    histogram.replaceChildren(...hitBins.map((count, i) => {
+      const bin = document.createElement("div");
+      bin.className = "hist-bin";
+      const hitBar = document.createElement("span");
+      hitBar.className = "hist-hit";
+      hitBar.style.height = String(count / maxCount * 76) + "px";
+      const missBar = document.createElement("span");
+      missBar.className = "hist-miss";
+      missBar.style.height = String(missBins[i] / maxCount * 76) + "px";
+      bin.append(hitBar, missBar);
+      return bin;
+    }));
+    histogram.setAttribute("aria-label", `100 个 Hit 与 100 个 Miss 教学样本按耗时分布；噪声 ${n}，阈值 ${t}`);
     readout.textContent = `模型样本：Hit 平均 ${hitAvg}、Miss 平均 ${missAvg}；阈值 ${t}；200 次判决中 ${correct} 次正确（${Math.round(correct / 2)}%）。`;
   }
   noise.addEventListener("input", render);
