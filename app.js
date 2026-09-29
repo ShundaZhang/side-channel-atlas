@@ -1,4 +1,5 @@
 "use strict";
+const zh = document.documentElement.lang.startsWith("zh");
 
 function initCaseFilters() {
   const buttons = [...document.querySelectorAll(".case-filter")];
@@ -60,8 +61,8 @@ function initTimingModel() {
       bin.append(hitBar, missBar);
       return bin;
     }));
-    histogram.setAttribute("aria-label", `100 个 Hit 与 100 个 Miss 教学样本按耗时分布；噪声 ${n}，阈值 ${t}`);
-    readout.textContent = `模型样本：Hit 平均 ${hitAvg}、Miss 平均 ${missAvg}；阈值 ${t}；200 次判决中 ${correct} 次正确（${Math.round(correct / 2)}%）。`;
+    histogram.setAttribute("aria-label", zh ? `100 个 Hit 与 100 个 Miss 教学样本按耗时分布；噪声 ${n}，阈值 ${t}` : `Timing distribution for 100 Hit and 100 Miss teaching samples; noise ${n}, threshold ${t}`);
+    readout.textContent = zh ? `模型样本：Hit 平均 ${hitAvg}、Miss 平均 ${missAvg}；阈值 ${t}；200 次判决中 ${correct} 次正确（${Math.round(correct / 2)}%）。` : `Model samples: mean Hit ${hitAvg}, mean Miss ${missAvg}; threshold ${t}; ${correct} correct classifications out of 200 (${Math.round(correct / 2)}%).`;
   }
   noise.addEventListener("input", render);
   threshold.addEventListener("input", render);
@@ -74,17 +75,23 @@ function initPipelineModel() {
   if (!next || !reset) return;
   const lines = [...document.querySelectorAll(".sim-line")];
   const readout = document.getElementById("pipeline-readout");
-  const captions = [
+  const captions = zh ? [
     "训练仅建立预测倾向；还没有泄漏。",
     "错误预测打开短暂执行窗口；检查尚未完成。",
     "教学模型中的值 3 被编码为 probe[3] 的缓存热状态。",
     "架构结果被撤销；模型中的缓存热状态没有被撤销。",
     "模型观测到 probe[3]。真实攻击还需反复采样、控制噪声与满足硬件条件。"
+  ] : [
+    "Training only establishes a prediction bias; no data has leaked yet.",
+    "Misprediction opens a brief transient window; the bounds check is still pending.",
+    "The teaching model encodes value 3 as a hot cache line at probe[3].",
+    "The architectural result is rolled back; the modeled cache state is not.",
+    "The model observes probe[3]. A real attack also needs repeated measurements, noise control, and suitable hardware."
   ];
   let step = -1;
   function render() {
     lines.forEach((line, i) => line.classList.toggle("active", i === step));
-    readout.textContent = step < 0 ? "点击“下一步”查看教学模型。" : captions[step];
+    readout.textContent = step < 0 ? (zh ? "点击“下一步”查看教学模型。" : "Click Next to step through the teaching model.") : captions[step];
     next.disabled = step >= captions.length - 1;
   }
   next.addEventListener("click", () => { if (step < captions.length - 1) step++; render(); });
