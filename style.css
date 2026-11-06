@@ -5,3 +5,78 @@
 @media(max-width:650px){.header .wrap{display:block;padding:14px 0}.nav{margin-top:13px}.nav a{padding:6px 8px;font-size:11px}.hero .wrap{padding:52px 0}.hero h1{font-size:49px}.hero p,.page-hero p{font-size:15px}.section{padding:55px 0}.section-head{display:block}.section-head p{margin-top:15px}.route,.cards,.case-grid,.source-grid,.compare{grid-template-columns:1fr}.route .card{min-height:0}.flow{grid-template-columns:1fr}.page-hero{padding:45px 0}.toc{display:none}.footer .wrap,.cross{display:block}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.btn,.bar{transition:none}}
 #atlas-langbar{position:sticky;top:0;z-index:9999;min-height:36px;display:flex;align-items:center;justify-content:flex-end;gap:4px;padding:4px 20px;background:#101c29;color:#e8f4f1;border-bottom:1px solid #3d5261;font:700 12px/1.3 Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;letter-spacing:.02em}#atlas-langbar a{display:inline-block;min-width:46px;padding:4px 9px;border-radius:4px;text-align:center;text-decoration:none;color:#b9c8d1;background:transparent;transition:background .15s,color .15s}#atlas-langbar a:hover,#atlas-langbar a:focus-visible{color:#fff;background:#355069}#atlas-langbar a[aria-current="page"]{color:#101c29;background:#d5eee2}#atlas-langbar a:focus-visible{outline:2px solid #d5eee2;outline-offset:2px}
+
+.trace-figure {
+  margin: 24px 0;
+  padding: clamp(14px, 3vw, 24px);
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+.trace-figure h3, .trace-figure h4 { margin: 0 0 13px; color: var(--ink); }
+.trace-figure figcaption { color: var(--muted); font-size: 13px; margin-top: 14px; }
+.trace-figure .trace-steps, .trace-figure .cache-rows { list-style: none; padding: 0; margin: 0; }
+.trace-steps { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 18px; }
+.trace-steps li {
+  position: relative;
+  padding: 13px;
+  border: 1px solid #3c5c6c;
+  border-radius: 4px;
+  background: #172e3e;
+  margin: 0;
+}
+.trace-steps li:not(:last-child)::after {
+  content: "→";
+  position: absolute;
+  right: -17px;
+  top: calc(50% - 14px);
+  color: var(--amber);
+}
+.trace-steps strong, .trace-steps span { display: block; }
+.trace-steps strong { color: var(--cyan); font-size: 14px; }
+.trace-steps span { color: #cfdee4; font-size: 13px; margin-top: 5px; }
+.cache-rows li {
+  display: grid;
+  grid-template-columns: minmax(170px, 1fr) minmax(0, 1.6fr);
+  gap: 10px;
+  align-items: center;
+  margin: 9px 0;
+}
+.cache-rows strong { color: var(--ink); font-size: 14px; }
+.cache-rows li > div { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
+.cache-rows li span {
+  text-align: center;
+  padding: 8px 2px;
+  border-radius: 4px;
+  border: 1px solid #437a79;
+  background: #173b42;
+  color: var(--cyan);
+  font: 700 15px/1.5 ui-monospace, monospace;
+}
+.cache-rows li span.displaced { border-color: #a16f51; background: #4a332d; color: var(--amber); }
+.trace-chart { display: block; width: 100%; max-width: 640px; height: auto; margin: 0 auto; }
+.trace-chart text { fill: var(--ink); font: 15px system-ui, sans-serif; }
+.chart-axis { fill: none; stroke: #a8bdc6; stroke-width: 1.4; }
+.chart-marker { fill: none; stroke: #e9f2f2; stroke-width: 1.3; stroke-dasharray: 5 4; }
+.chart-hit { fill: var(--cyan); }
+.chart-miss { fill: var(--amber); }
+.chart-zone { fill: #366669; }
+.chart-raw, .chart-filtered { fill: none; stroke-width: 2.8; stroke-linejoin: round; }
+.chart-raw { stroke: var(--amber); }
+.chart-filtered { stroke: var(--cyan); }
+.trace-table { min-width: 540px; }
+.trace-table tbody th { background: var(--panel2); }
+.trace-refs { font-size: 13px; }
+.chapter [id] { scroll-margin-top: 56px; }
+.chapter, .section[id] { scroll-margin-top: 56px; }
+.prose .codeblock { border: 1px solid var(--line); }
+.prose .table-wrap { margin: 20px 0; }
+@media (max-width: 740px) {
+  .trace-steps { grid-template-columns: minmax(0, 1fr); }
+  .trace-steps li:not(:last-child)::after { content: "↓"; top: auto; right: calc(50% - 5px); bottom: -22px; }
+  .cache-rows li { grid-template-columns: minmax(0, 1fr); gap: 3px; }
+}
+.article-layout > div, .lab-grid > * { min-width: 0; }
+@media (max-width: 650px) {
+  .trace-chart text { font-size: 18px; }
+}

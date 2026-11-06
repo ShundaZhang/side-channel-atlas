@@ -32,7 +32,8 @@ function initTimingModel() {
       seed ^= seed << 13; seed ^= seed >>> 17; seed ^= seed << 5;
       return (seed >>> 0) / 4294967296;
     };
-    let correct = 0, hitSum = 0, missSum = 0;
+    let falsePositives = 0, falseNegatives = 0;
+    let hitSum = 0, missSum = 0;
     const hitBins = Array(14).fill(0);
     const missBins = Array(14).fill(0);
     for (let i = 0; i < 100; i++) {
@@ -41,8 +42,8 @@ function initTimingModel() {
       hitSum += hit; missSum += miss;
       hitBins[Math.min(13, Math.floor(hit / 20))]++;
       missBins[Math.min(13, Math.floor(miss / 20))]++;
-      if (hit < t) correct++;
-      if (miss >= t) correct++;
+      if (hit >= t) falseNegatives++;
+      if (miss < t) falsePositives++;
     }
     const hitAvg = Math.round(hitSum / 100);
     const missAvg = Math.round(missSum / 100);
@@ -62,7 +63,10 @@ function initTimingModel() {
       return bin;
     }));
     histogram.setAttribute("aria-label", zh ? `100 个 Hit 与 100 个 Miss 教学样本按耗时分布；噪声 ${n}，阈值 ${t}` : `Timing distribution for 100 Hit and 100 Miss teaching samples; noise ${n}, threshold ${t}`);
-    readout.textContent = zh ? `模型样本：Hit 平均 ${hitAvg}、Miss 平均 ${missAvg}；阈值 ${t}；200 次判决中 ${correct} 次正确（${Math.round(correct / 2)}%）。` : `Model samples: mean Hit ${hitAvg}, mean Miss ${missAvg}; threshold ${t}; ${correct} correct classifications out of 200 (${Math.round(correct / 2)}%).`;
+    const correct = 200 - falsePositives - falseNegatives;
+    readout.textContent = zh
+      ? `阈值 ${t} · 误报 ${falsePositives}/100 · 漏报 ${falseNegatives}/100 · 均衡准确率 ${(correct / 2).toFixed(1)}%`
+      : `Threshold ${t} · false positives ${falsePositives}/100 · false negatives ${falseNegatives}/100 · balanced accuracy ${(correct / 2).toFixed(1)}%`;
   }
   noise.addEventListener("input", render);
   threshold.addEventListener("input", render);

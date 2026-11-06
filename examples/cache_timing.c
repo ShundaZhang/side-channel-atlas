@@ -7,6 +7,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <x86intrin.h>
 
 enum { SAMPLES = 1001 };
@@ -22,13 +23,20 @@ static uint64_t timed_read(volatile unsigned char *p) {
     unsigned aux;
     _mm_lfence();
     uint64_t start = __rdtscp(&aux);
+    _mm_lfence();
     (void)*p;
     _mm_lfence();
     uint64_t end = __rdtscp(&aux);
+    _mm_lfence();
     return end - start;
 }
 
-int main(void) {
+int main(int argc, char **argv) {
+    int csv = argc == 2 && strcmp(argv[1], "--csv") == 0;
+    if (argc != 1 && !csv) {
+        fprintf(stderr, "Usage: %s [--csv]\n", argv[0]);
+        return 2;
+    }
     uint64_t hit[SAMPLES], miss[SAMPLES];
     volatile unsigned char *p = &buffer[0];
     *p = 7;
@@ -39,11 +47,17 @@ int main(void) {
         _mm_mfence();
         miss[i] = timed_read(p);
     }
+    if (csv) {
+        puts("pair,cached_tsc_ticks,flushed_tsc_ticks");
+        for (int i = 0; i < SAMPLES; ++i)
+            printf("%d,%llu,%llu\n", i, (unsigned long long)hit[i], (unsigned long long)miss[i]);
+        return 0;
+    }
     qsort(hit, SAMPLES, sizeof hit[0], compare_u64);
     qsort(miss, SAMPLES, sizeof miss[0], compare_u64);
     printf("samples=%d, own buffer only\n", SAMPLES);
-    printf("cached median=%llu cycles\n", (unsigned long long)hit[SAMPLES / 2]);
-    printf("flushed median=%llu cycles\n", (unsigned long long)miss[SAMPLES / 2]);
+    printf("cached median=%llu TSC ticks\n", (unsigned long long)hit[SAMPLES / 2]);
+    printf("flushed median=%llu TSC ticks\n", (unsigned long long)miss[SAMPLES / 2]);
     puts("These medians are observations, not a CPU vulnerability verdict.");
     return 0;
 }
