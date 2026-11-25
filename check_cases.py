@@ -5,6 +5,8 @@ from urllib.parse import urlsplit
 import json,xml.etree.ElementTree as ET,hashlib,subprocess,sys
 from collections import Counter
 from case_notes import CASES,SOURCES,WALKTHROUGHS
+from diagram_examples import EXCERPTS
+from case_diagrams import wrap
 ROOT=Path(__file__).resolve().parent
 class Page(HTMLParser):
  def __init__(self):super().__init__();self.ids=[];self.links=[];self.images=[];self.styles=[];self.sections=[];self.cards=[];self.languages={};self.traces=0;self.a=None
@@ -48,8 +50,19 @@ for zh in (False,True):
   assert not any(x in text for x in ['/Users/','/var/folders/','xiang/outputs'])
   for link in legacy.get(c['id'],{}).get(lang,[]):assert link['href'] in index.read_text(),link
   svg=ROOT/urlsplit(page.images[0]['src']).path;tree=ET.parse(svg)
-  assert tree.getroot().attrib['viewBox']=='0 0 1000 490'
+  assert tree.getroot().attrib['viewBox']=='0 0 1280 1000'
   assert len(tree.findall('.//{http://www.w3.org/2000/svg}marker'))==2
+  nodes=list(tree.iter());ex=EXCERPTS[c['id']]
+  assert len([n for n in nodes if n.attrib.get('class')=='code-line'])==6
+  assert len([n for n in nodes if n.attrib.get('class')=='code-highlight'])==len(ex['hot'])
+  svgtext=' '.join(tree.getroot().itertext())
+  for code,note in ex['rows']:
+   assert len(code)*18*.61 < 633, (c['id'], code)
+   assert len(wrap(note[1 if zh else 0],427/18))<=2
+   assert code in svgtext
+   assert code.replace('&','&amp;').replace('<','&lt;').replace('>','&gt;') in text
+  assert 'diagram-code' in text
+  if ex['cite']:assert ex['cite'][1] in text
  print(lang,'14 guides, one diagram and seven sections each, language/reading/source links PASS')
 # Rebuild in place and make sure generated output is deterministic.
 files=list(ROOT.glob('case-*.html'))+[ROOT/'cases.html',ROOT/'cases.zh.html']+list((ROOT/'assets/cases').glob('*.svg'))

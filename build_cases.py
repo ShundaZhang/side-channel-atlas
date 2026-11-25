@@ -4,7 +4,8 @@ from pathlib import Path
 from html import escape as e
 import re,hashlib,json
 from case_notes import CASES,SOURCES,WALKTHROUGHS,EXAMPLES
-from case_diagrams import make_diagram
+from case_diagrams import make_diagram, WIDTH, HEIGHT
+from diagram_examples import EXCERPTS
 ROOT=Path(__file__).resolve().parent
 LEGACY=json.loads((ROOT/'case_original_links.json').read_text())
 
@@ -39,7 +40,11 @@ def main():
    body+='<div class="wrap guide-layout">'+toc+'<article class="guide-content">'
    def start(id,title):return '<section id="'+id+'"><h2>'+t(title)+'</h2>'
    body+=start(*headings[0])+'<dl class="case-snapshot">'+''.join('<div><dt>'+t(label)+'</dt><dd>'+e(t(c[key]))+'</dd></div>' for key,label in [('trigger',('Trigger','触发事件')),('source',('Data / prediction source','数据 / 预测来源')),('formal',('Architectural result','正式结果')),('transient',('Affected transient behavior','受影响的瞬态行为'))])+'</dl>'+p(c['mechanism'])
-   body+='<figure class="case-diagram"><a href="'+svg+'?v='+digest(ROOT/svg)+'" target="_blank" rel="noopener"><img src="'+svg+'?v='+digest(ROOT/svg)+'" width="1000" height="490" alt="'+e(t(c['thesis']),quote=True)+'" loading="lazy"></a><figcaption>'+t(('Original teaching diagram. Solid blue shows the correct semantics; dashed orange shows the affected recovery path. This exception can make stale data architecturally visible. Open full size for the labels.','本站教学图。蓝色实线表示正确语义，橙色虚线表示受影响的恢复路径。这个例外可能使旧值在架构上可见，点击可查看完整大图。') if c['id']=='zenbleed' else ('Original teaching diagram. Solid blue shows the architectural outcome; dashed orange shows the affected transient path. Open full size for the labels.','本站教学图。蓝色实线表示正式结果，橙色虚线表示受影响的瞬态路径。点击可查看完整大图。'))+'</figcaption></figure></section>'
+   body+='<figure class="case-diagram"><a href="'+svg+'?v='+digest(ROOT/svg)+'" target="_blank" rel="noopener"><img src="'+svg+'?v='+digest(ROOT/svg)+'" width="1280" height="1000" alt="'+e(t(c['thesis']),quote=True)+'" loading="lazy"></a><figcaption>'+t(('Original teaching diagram. Solid blue shows the correct semantics; dashed orange shows the affected recovery path. This exception can make stale data architecturally visible. Key code and line annotations are embedded below the flow; open full size or expand the copyable text.','本站教学图。蓝色实线表示正确语义，橙色虚线表示受影响的恢复路径。这个例外可能使旧值在架构上可见，图中包含关键代码与逐行解释；可点图放大，或展开下方可复制文本。') if c['id']=='zenbleed' else ('Original teaching diagram. Solid blue shows the architectural outcome; dashed orange shows the affected transient path. Key code and line annotations are embedded below the flow; open full size or expand the copyable text.','本站教学图。蓝色实线表示正式结果，橙色虚线表示受影响的瞬态路径。图中包含关键代码与逐行解释；可点图放大，或展开下方可复制文本。'))+'</figcaption></figure></section>'
+   ex=EXCERPTS[c['id']]
+   code_text='\n'.join(f'{i:02}  '+code+'  // '+t(note) for i,(code,note) in enumerate(ex['rows'],1))
+   code_source=('<p><a target="_blank" rel="noopener noreferrer" href="'+ex['cite'][1]+'">'+e(ex['cite'][0])+'</a></p>') if ex['cite'] else ''
+   body+='<details class="diagram-code"><summary>'+t(('Copyable code and line annotations from the diagram','复制图中的代码与逐行解释'))+'</summary><p>'+e(t(ex['kind']))+'</p><pre class="case-trace"><code>'+e(code_text)+'</code></pre>'+code_source+'</details>'
    example=''
    if c['id'] in EXAMPLES:
     ex=EXAMPLES[c['id']]
