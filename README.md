@@ -31,3 +31,5 @@ python3 check_navigation.py
 数据保存在 `case_notes.py`，原创双语 SVG 由 `case_diagrams.py` 生成，图内代码和逐行解释保存在 `diagram_examples.py`。每图按「触发 / 正式与受影响路径 / 数据来源 + 高亮代码」布局，页面提供可展开的复制版。论文指令摘录附原始出处，其余语义伪代码不冒充可运行 PoC。构建不需要第三方 Python 包。源页面和新图使用版本化资源 URL，避免复用旧图缓存。
 
 教学模型区分正式结果与可能的瞬态行为，特别注明 Zenbleed 可产生架构可见错误这一例外。编号片段和虚构数值不构成可运行的利用链，不声称对硬件完成复现。机制与一手资料核验于 2026 年 11 月。
+
+Retbleed / BHI 的前置依赖与训练因果解释保存在 `prediction_notes.py`，双语训练图由 `prediction_diagrams.py` 生成。Spectre V2、BHI、Retbleed、Inception 页面先介绍间接分支、真实 / 预测目标、BTB、BHB 与训练；返回相关页面另补 RSB / 软件栈对照。Retbleed 明确区分 Intel 下溢 / 替代路径与原评估 AMD 类型混淆，不把 BHI 目标关联与历史构造混为一谈。

@@ -5,3 +5,5 @@
 
 /* Diagram text is also available as selectable HTML, including on small screens. */
 .diagram-code{margin:0 0 24px;padding:15px 19px;border:1px solid var(--line);border-radius:8px;background:var(--panel)}.diagram-code summary{cursor:pointer;color:var(--cyan);font-size:16px;font-weight:650}.diagram-code p{font-size:15px}.diagram-code a{color:var(--cyan)}.diagram-code .case-trace{margin-bottom:6px}.case-diagram a:focus-visible{outline:3px solid var(--cyan);outline-offset:-3px}
+
+.prediction-concepts>div{padding:16px 22px;margin:17px 0;border-left:3px solid var(--cyan);background:var(--panel);scroll-margin-top:72px}.guide-content h3{font-size:20px;line-height:1.5;margin:24px 0 12px;color:#e2eef3}.prediction-concepts h3{margin-top:0}.prediction-concepts p:last-child{margin-bottom:0}.prediction-references{font-size:14px}.prediction-references a{color:var(--cyan);overflow-wrap:anywhere}

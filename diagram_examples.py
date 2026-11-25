@@ -61,20 +61,21 @@ row('event: asynchronous_abort_pending', 'Not a synchronous XABORT recipe', '不
 row('transient: t = buffer_sample(0x42)', 'Affected window may sample a buffer', '受影响窗口可能取得缓冲区样本'),
 row('architectural: abort; counter = 5', 'Transaction writes are rolled back', '事务写入仍正确回滚'),
 row('observe_trace(t)  // separate step', 'Sample is not a transaction result', '样本不是提交的事务结果')]),
-'bhi': dict(hot=[3,4], detail=('Keep learned candidates fixed; change the history context.', '保持已学习的候选目标不变，改变历史上下文。'), visual='targets', labels=['H_A => candidate A','H_B => candidate B','Real => NORMAL'], note=('Model, not a fixed table layout', '逻辑模型，不代表固定表结构'), rows=[
-row('real_target(J) = NORMAL', 'Architectural target stays intact', '正式目标始终不变'),
-row('learned_candidates = {A, B}', 'Hold these candidates fixed', '对照中保持候选目标不变'),
-row('history = H_A -> predict A', 'History participates in selection', '历史参与目标候选选择'),
-row('history = H_B -> predict B', 'Different history can choose B', '不同历史可能选中 B'),
-row('transient: execute(B) if B != NORMAL', 'Wrong target can execute transiently', '错误目标可能短暂执行'),
-row('architectural: execute(NORMAL)', 'Not a function-pointer rewrite', '不是改写函数指针')]),
-'retbleed': dict(hot=[3,4], detail=('The saved return stays R_OK; affected RET prediction selects R_OTHER.', '保存的返回地址仍为 R_OK；受影响预测却选中 R_OTHER。'), visual='targets', labels=['Saved: R_OK','RET','Predicted: R_OTHER'], note=('CPU-specific prediction conditions', '预测条件取决于具体处理器'), rows=[
-row('CALL worker  // saved return = R_OK', 'Abstract call / return context', '抽象的调用 / 返回上下文'),
-row('worker: saved_return remains R_OK', 'No software stack overwrite', '没有改写软件栈上的返回地址'),
-row('RET', 'Return instruction is the branch', '返回指令自身就是分支'),
-row('affected_predict(RET) = R_OTHER', 'Not a universal RSB-underflow rule', '并非通用的 RSB 下溢规则'),
-row('transient: execute(R_OTHER)', 'Wrong-path gadget may leave a trace', '错误路径 gadget 可能留下痕迹'),
-row('architectural: return_to(R_OK)', 'Real target is resolved and honored', '真实返回目标解析后仍被遵守')]),
+
+'bhi': dict(hot=[2,4], detail=('Seed target state in-domain; shape history before victim J.', '同域建立目标关联；进入受害者 J 前构造历史。'), visual='targets', labels=['Seed: branch -> G','History: H_G','J: actual NORMAL'], note=('History selects; fp is unchanged', '历史参与选择；fp 始终未变'), rows=[
+row('kernel_seed: indirect_branch_to(G)', 'Learn eligible in-domain target state', '学习允许预测域内的目标关联'),
+row('user: execute_branch_sequence(H_G)', 'Shape history; not a writable BHB API', '构造历史；不是直接写入 BHB 的 API'),
+row('victim J: call fp  // fp = NORMAL', 'Real operand is still NORMAL', '真实操作数仍然是 NORMAL'),
+row('predict(J, H_G, mode, learned_state) = G', 'Matching history may select learned G', '匹配历史可能选中已学习的 G'),
+row('transient: G uses victim data', 'Gadget must create an observable effect', 'gadget 仍须产生可观察效应'),
+row('resolve: execute NORMAL; discard G', 'Not a pointer overwrite or a new target', '不是改写指针或凭空新增目标')]),
+'retbleed': dict(hot=[2,4], detail=('RSB supplies early return predictions; the software stack keeps R_OK.', 'RSB 提供提前的返回预测；软件栈仍保留 R_OK。'), visual='targets', labels=['Train S -> G','Victim T: RET','Stack: R_OK'], note=('Intel / AMD conditions differ', 'Intel / AMD 的受影响条件不同'), rows=[
+row('train: branch_at(S) -> G', 'Relevant predictor aliasing with T', '需要在相关预测状态中与 T 别名'),
+row('condition: RSB shortage OR type confusion', 'Intel / AMD evaluated paths differ', 'Intel / AMD 原评估路径不同'),
+row('victim: saved_stack_target = R_OK', 'Stack keeps the real return address', '软件栈保存真实返回地址'),
+row('T: RET  // affected prediction -> G', 'RSB is not the architectural stack', 'RSB 不是正式软件栈'),
+row('transient: execute G', 'Gadget may leave a data-related trace', 'gadget 可能留下数据相关痕迹'),
+row('resolve: return_to(R_OK)', 'No saved return address was overwritten', '没有覆盖保存的真实返回地址')]),
 'gds': dict(hot=[3,4], detail=('Gather should load lanes from addresses; stale vector state is different.', 'gather 应按地址读取各 lane；陈旧向量状态不是合法来源。'), visual='slots', labels=['11','22','99','44'], note=('99 is stale, not a valid lane result', '99 是旧值，不是合法完成的元素'), rows=[
 row('expected = gather([a0, a1, a2, a3])', 'Semantic lanes, not assembly syntax', '语义 lane 示例，不是汇编语法'),
 row('expected_values = [11, 22, 33, 44]', 'Illustrative intended values', '教学设定的正确值'),

@@ -17,6 +17,7 @@ SOURCES={
 'zombieload':('ZombieLoad · original research','https://www.zombieload.com/zombieload.pdf'),
 'bhi':('Intel · BHI / Intra-mode BTI','https://www.intel.com/content/www/us/en/developer/articles/technical/software-security-guidance/technical-documentation/branch-history-injection.html'),
 'bhi-paper':('BHI · original research','https://www.usenix.org/conference/usenixsecurity22/presentation/barberis'),
+'retbleed-paper':('Retbleed · original paper','https://comsec.ethz.ch/wp-content/files/retbleed_sec22.pdf'),
 'retbleed':('ETH COMSEC · Retbleed','https://comsec.ethz.ch/research/microarch/retbleed/'),
 'rsb':('Linux · RSB mitigations','https://docs.kernel.org/admin-guide/hw-vuln/rsb.html'),
 'gds':('Linux · Gather Data Sampling','https://docs.kernel.org/admin-guide/hw-vuln/gather_data_sampling.html'),
@@ -238,58 +239,44 @@ CASES=[
 [06] 0x42 不是提交的事务结果'''),
  read=('Compare the original ZombieLoad Variant 2 discussion with Linux’s TAA trigger and mitigation status. Distinguish the observer’s TSX requirement from the victim’s ordinary activity.',
  '将 ZombieLoad Variant 2 的讨论与 Linux 的 TAA 触发 / 状态说明对照，区分观察者的 TSX 前提与受害者的普通活动。')),
- dict(id='bhi',name='BHI · Branch History Injection',year=2022,cve='CVE-2022-0001',family='prediction',refs=['bhi-paper','bhi'],
- thesis=('Changing branch-history context can change which learned target is predicted, without changing the real target.','分支历史上下文变化，可能改变选中的已学习预测目标，而真实目标不变。'),
- trigger=('History-sensitive indirect prediction','间接目标预测受历史影响'),source=('History selects a target candidate','历史参与选择目标候选'),formal=('Resolve and execute NORMAL','解析并执行 NORMAL'),transient=('A history-selected wrong gadget','历史选中的错误 gadget'),
- mechanism=('Hold the indirect branch J, real target NORMAL and learned candidates A/B constant. In a conceptual predictor, context H_A selects A while H_B selects B. If B is wrong, its instructions may briefly execute before resolution. H_A and H_B are labels, not recipes for real history construction. This contrast illustrates why restricting target state and isolating history are not necessarily the same intervention.',
- '保持间接分支 J、真实目标 NORMAL 和已学习候选 A/B 不变。在概念预测器中，上下文 H_A 选 A，H_B 选 B。如果 B 不是正确目标，它的指令可能在解析前短暂执行。H_A、H_B 只是标签，不是真实历史构造配方。这个对照说明限制目标状态与隔离历史不一定是同一种干预。'),
- training=('The emphasis is on history/context influencing target choice, not an out-of-bounds array index. It need not be described as directly inserting a fresh victim target. This is a distinction in causal focus, not a universal two-table microarchitecture.',
- '重点是历史 / 上下文影响目标选择，不是越界数组索引，也不必描述成直接插入一个新的受害者目标。这是因果关注点的区别，不是声称所有 CPU 都有相同的两张硬件表。'),
- boundary=('A leakage gadget and an observation channel remain necessary. Cross-domain and intra-mode cases have different constraints. Read the exact kernel paths and CPU behavior; a broad statement that eIBRS is enabled does not settle every history-related attack.',
- '仍需泄漏 gadget 和观察通道。跨域与同模式场景约束不同，需阅读具体内核路径与 CPU 行为；笼统地说已启用 eIBRS，不能解决所有历史相关问题。'),
- mitigation=('Apply the current platform-specific combination of history controls, kernel history-clearing/hardening and relevant predictor protections. Intel guidance distinguishes BHI_DIS_S and, on supporting systems, IBHF for additional history-related hardening. Verify applicability rather than relying on a single feature label.',
- '使用当前平台适用的历史控制、内核历史清理 / 加固及预测器防护组合。Intel 指南区分 BHI_DIS_S，以及在支持平台上用于额外历史加固的 IBHF。应核对适用性，不依赖一个功能标签。'),
- contrast=('Classic BTI focuses on influenced target prediction; BHI highlights the history used to choose a target. Both belong to the Spectre-V2 family and still require a useful disclosure path.',
- '经典 BTI 关注受影响的目标预测，BHI 强调选目标时使用的历史。两者同属 Spectre-V2 家族，都仍需可用泄漏路径。'),
- trace=('''[01] indirect branch J; real target = NORMAL
-[02] learned candidates A and B stay fixed
-[03] context H_A → prediction A
-[04] context H_B → prediction B
-[05] transient: if B != NORMAL, B may execute
-[06] architectural: execute NORMAL, not B''','''[01] 间接分支 J，真实目标 = NORMAL
-[02] 已学习候选 A、B 保持不变
-[03] 上下文 H_A → 预测 A
-[04] 上下文 H_B → 预测 B
-[05] 瞬态：若 B 不是 NORMAL，可能先执行 B
-[06] 正式：执行 NORMAL，不提交 B 路径'''),
- read=('In the BHI paper, label branch PC, history and target candidates separately. In updated vendor guidance, distinguish the original attack class from later gadgets and hardening additions.',
- '读 BHI 论文时，分别标出分支位置、历史和候选目标。读更新后的厂商指南时，区分最初机制、后续 gadget 与新增加固。')),
- dict(id='retbleed',name='Retbleed · Return Target Prediction',year=2022,cve='CVE-2022-29900 / CVE-2022-29901',family='prediction',refs=['retbleed','rsb'],
- thesis=('A RET can transiently go to a wrong target even though the saved architectural return address was never changed.','即使保存的正式返回地址未被改写，RET 仍可能短暂走向错误预测目标。'),
- trigger=('RET under affected prediction conditions','RET 处于受影响预测条件'),source=('Return-target predictor state','返回目标预测状态'),formal=('Return to saved R_OK','正式返回保存的 R_OK'),transient=('Briefly execute R_OTHER','短暂执行 R_OTHER'),
- mechanism=('CALL worker records a return address R_OK. At RET the machine may start fetching a predicted target before the real return resolves. Retbleed shows affected return-prediction paths on particular Intel and AMD implementations. In the model, R_OTHER is a symbolic wrong target; it does not replace the saved address. Once the return resolves the wrong path is discarded, but an executed disclosure gadget may have left a trace.',
- 'CALL worker 保存返回地址 R_OK。在 RET 的真实结果确定前，CPU 可能先从预测目标取指。Retbleed 展示特定 Intel 与 AMD 实现上的受影响返回预测路径。模型中的 R_OTHER 是错误目标标签，不会替换保存的返回地址。返回解析后，错误路径被取消，但已经执行的泄漏 gadget 仍可能留下痕迹。'),
- training=('The relevant state is return/target prediction. On evaluated Intel designs RSB underflow is important; the documented AMD behavior is not captured by that same rule. Do not turn one implementation’s trigger into a universal statement about every RET.',
- '相关状态是返回 / 目标预测。研究涉及的 Intel 设计中 RSB 下溢很重要，但同一规则不能概括文献描述的 AMD 行为。不能把某一实现的触发条件当作所有 RET 的通用规则。'),
- boundary=('The attack needs a reachable return and suitable victim code under the evaluated predictor-sharing conditions. Kernel-disclosure demonstrations do not establish identical behavior on newer or differently configured CPUs.',
- '需要可触达的返回点、合适的受害者代码及研究中的预测器共享条件。内核泄漏演示不能外推为更新或不同配置 CPU 上的相同行为。'),
- mitigation=('Use the model-specific microcode and kernel return-path defenses, including applicable return thunks, RSB handling or hardware controls. Retpoline’s use of returns does not prove protection where returns themselves take an affected target-prediction path.',
- '按型号使用微码和内核返回路径缓解，包括适用的返回跳板、RSB 处理或硬件控制。retpoline 使用返回指令，不等于在返回本身进入受影响预测路径时仍能单独保护。'),
- contrast=('A prediction problem is not a stack overwrite or ROP modification of the architectural return address. BHI focuses on history selection; Retbleed focuses on the return instruction’s prediction path.',
- '预测问题不是栈覆盖，也不是用 ROP 改写正式返回地址。BHI 关注历史选择，Retbleed 关注返回指令进入哪种预测路径。'),
- trace=('''[01] CALL worker; saved return = R_OK
-[02] worker executes; saved return remains R_OK
-[03] RET
-[04] affected prediction: target = R_OTHER
-[05] transient: instructions at R_OTHER may execute
-[06] architectural: return to R_OK''','''[01] CALL worker，保存返回地址 R_OK
-[02] worker 执行，保存地址仍为 R_OK
-[03] RET
-[04] 受影响预测：目标为 R_OTHER
-[05] 瞬态：R_OTHER 的指令可能先执行
-[06] 正式：返回 R_OK'''),
- read=('Read the research team’s Intel and AMD conditions separately. Follow the return instruction, prediction source and eventual saved address through the argument; then examine the matching kernel defense.',
- '分别阅读研究团队给出的 Intel、AMD 条件，沿返回指令、预测来源及最终保存地址跟踪论证，再检查匹配的内核缓解。')),
+ dict(
+  id='bhi',
+  name='BHI · Branch History Injection',
+  year=2022,
+  cve='CVE-2022-0001',
+  family='prediction',
+  refs=['bhi-paper', 'bhi'],
+  thesis=('Changing branch-history context can change which learned target is predicted, without changing the real target.', '分支历史上下文变化，可能改变选中的已学习预测目标，而真实目标不变。'),
+  trigger=('History-sensitive indirect prediction', '间接目标预测受历史影响'),
+  source=('History selects eligible learned state', '历史选择允许域内的已学习项'),
+  formal=('Resolve and execute NORMAL', '解析并执行 NORMAL'),
+  transient=('A history-selected wrong gadget', '历史选中的错误 gadget'),
+  mechanism=('At victim branch J, a function pointer fp supplies the real target NORMAL. A conceptual target predictor also considers recent branch history and eligible learned target state. First a useful G association must be learned in the relevant prediction domain; then history shaped by executed branches can bias the selection toward G. Neither phase overwrites fp. After target resolution the CPU executes NORMAL and discards the G path. H_A/H_G denote contexts, not software-writable BHB bit strings.', '在受害者分支 J 处，函数指针 fp 决定真实目标 NORMAL。概念上的目标预测还会参考近期分支历史及允许域内的已学习目标状态。先在相关预测域内建立有用的 G 关联，再通过实际执行分支构造历史，使目标选择可能偏向 G。两个阶段都不改写 fp。真实目标解析后，CPU 执行 NORMAL 并取消 G 路径。H_A / H_G 是上下文标签，不是软件可写入 BHB 的比特串。'),
+  training=('The emphasis is on history/context influencing target choice, not an out-of-bounds array index. It need not be described as directly inserting a fresh victim target. This is a distinction in causal focus, not a universal two-table microarchitecture.', '重点是历史 / 上下文影响目标选择，不是越界数组索引，也不必描述成直接插入一个新的受害者目标。这是因果关注点的区别，不是声称所有 CPU 都有相同的两张硬件表。'),
+  boundary=('A leakage gadget and an observation channel remain necessary. Cross-domain and intra-mode cases have different constraints. Read the exact kernel paths and CPU behavior; a broad statement that eIBRS is enabled does not settle every history-related attack.', '仍需泄漏 gadget 和观察通道。跨域与同模式场景约束不同，需阅读具体内核路径与 CPU 行为；笼统地说已启用 eIBRS，不能解决所有历史相关问题。'),
+  mitigation=('Apply the current platform-specific combination of history controls, kernel history-clearing/hardening and relevant predictor protections. Intel guidance distinguishes BHI_DIS_S and, on supporting systems, IBHF for additional history-related hardening. Verify applicability rather than relying on a single feature label.', '使用当前平台适用的历史控制、内核历史清理 / 加固及预测器防护组合。Intel 指南区分 BHI_DIS_S，以及在支持平台上用于额外历史加固的 IBHF。应核对适用性，不依赖一个功能标签。'),
+  contrast=('Classic BTI focuses on influenced target prediction; BHI highlights the history used to choose a target. Both belong to the Spectre-V2 family and still require a useful disclosure path.', '经典 BTI 关注受影响的目标预测，BHI 强调选目标时使用的历史。两者同属 Spectre-V2 家族，都仍需可用泄漏路径。'),
+  trace=('[01] in-domain seed branch establishes a useful G target association\n[02] victim J: fp = handlers[id] = NORMAL; keep learned state fixed\n[03] control context H_A may select prediction NORMAL\n[04] execute branches before domain entry to shape matching context H_G\n[05] at J, H_G may select learned G; transiently execute G\n[06] architectural: fp still resolves to NORMAL; discard G path', '[01] 同域训练分支建立有用的目标 G 关联\n[02] 受害者 J：fp = handlers[id] = NORMAL；保持已学习状态不变\n[03] 对照上下文 H_A 可能选中预测 NORMAL\n[04] 进入受害者域前实际执行分支，构造匹配上下文 H_G\n[05] 在 J 处，H_G 可能选中已学习的 G，使 G 瞬态执行\n[06] 正式：fp 仍解析为 NORMAL，取消 G 路径'),
+  read=('In the BHI paper, label branch PC, history and target candidates separately. In updated vendor guidance, distinguish the original attack class from later gadgets and hardening additions.', '读 BHI 论文时，分别标出分支位置、历史和候选目标。读更新后的厂商指南时，区分最初机制、后续 gadget 与新增加固。')),
+ dict(
+  id='retbleed',
+  name='Retbleed · Return Target Prediction',
+  year=2022,
+  cve='CVE-2022-29900 / CVE-2022-29901',
+  family='prediction',
+  refs=['retbleed', 'rsb'],
+  thesis=('A RET can transiently go to a wrong target even though the saved architectural return address was never changed.', '即使保存的正式返回地址未被改写，RET 仍可能短暂走向错误预测目标。'),
+  trigger=('RET under affected prediction conditions', 'RET 处于受影响预测条件'),
+  source=('Return-target predictor state', '返回目标预测状态'),
+  formal=('Return to saved R_OK', '正式返回保存的 R_OK'),
+  transient=('Briefly execute G', '短暂执行 G'),
+  mechanism=('The software stack keeps the real return R_OK; the RSB normally supplies an early return prediction. On the affected Intel path, a shortage of usable RSB entries can enable alternate target prediction. On evaluated AMD Zen 1/2, indirect-branch type confusion can affect a RET without first emptying the RAS. A trained code target G may then be fetched transiently; resolving the stack target returns to R_OK. The separate training section explains the required target association and CPU-specific condition.', '软件栈保留真实返回地址 R_OK，RSB 通常提供提前返回预测。受影响的 Intel 路径中，可用 RSB 项不足可使 RET 改用替代目标预测；原评估的 AMD Zen 1 / 2 则可通过间接分支类型混淆影响 RET，不要求 RAS 先变空。训练过的代码目标 G 可能因此先被瞬态取指；栈目标解析后仍返回 R_OK。下方训练章节分别解释所需的目标关联与具体 CPU 条件。'),
+  training=('The relevant state is return/target prediction. On evaluated Intel designs RSB underflow is important; the documented AMD behavior is not captured by that same rule. Do not turn one implementation’s trigger into a universal statement about every RET.', '相关状态是返回 / 目标预测。研究涉及的 Intel 设计中 RSB 下溢很重要，但同一规则不能概括文献描述的 AMD 行为。不能把某一实现的触发条件当作所有 RET 的通用规则。'),
+  boundary=('The attack needs a reachable return and suitable victim code under the evaluated predictor-sharing conditions. Kernel-disclosure demonstrations do not establish identical behavior on newer or differently configured CPUs.', '需要可触达的返回点、合适的受害者代码及研究中的预测器共享条件。内核泄漏演示不能外推为更新或不同配置 CPU 上的相同行为。'),
+  mitigation=('Use the model-specific microcode and kernel return-path defenses, including applicable return thunks, RSB handling or hardware controls. Retpoline’s use of returns does not prove protection where returns themselves take an affected target-prediction path.', '按型号使用微码和内核返回路径缓解，包括适用的返回跳板、RSB 处理或硬件控制。retpoline 使用返回指令，不等于在返回本身进入受影响预测路径时仍能单独保护。'),
+  contrast=('A prediction problem is not a stack overwrite or ROP modification of the architectural return address. BHI focuses on history selection; Retbleed focuses on the return instruction’s prediction path.', '预测问题不是栈覆盖，也不是用 ROP 改写正式返回地址。BHI 关注历史选择，Retbleed 关注返回指令进入哪种预测路径。'),
+  trace=('[01] earlier CALL saved real return R_OK in the software stack\n[02] train source S toward G; relevant predictor state aliases RET site T\n[03] at T: affected Intel RSB condition OR evaluated AMD type confusion\n[04] T: RET may predict G; the saved stack target is still R_OK\n[05] transient: G may execute and leave a data-dependent trace\n[06] architectural: resolve the stack target and return to R_OK', '[01] 较早的 CALL 在软件栈保存真实返回地址 R_OK\n[02] 训练源位置 S → G；在相关预测状态中与 RET 位置 T 别名\n[03] 到达 T：受影响 Intel 的 RSB 条件，或原评估 AMD 的类型混淆\n[04] T: RET 可能先预测到 G；软件栈目标仍是 R_OK\n[05] 瞬态：G 可能执行并留下数据相关痕迹\n[06] 正式：解析栈目标，返回 R_OK'),
+  read=('Read the research team’s Intel and AMD conditions separately. Follow the return instruction, prediction source and eventual saved address through the argument; then examine the matching kernel defense.', '分别阅读研究团队给出的 Intel、AMD 条件，沿返回指令、预测来源及最终保存地址跟踪论证，再检查匹配的内核缓解。')),
  dict(id='gds',name='Downfall · Gather Data Sampling',year=2023,cve='CVE-2022-40982',family='sampling',refs=['downfall','gds'],
  thesis=('An affected transient gather may forward stale vector data; the victim need only have used vector registers.','受影响的瞬态 gather 可能转发旧向量数据，被观察者只需使用过向量寄存器。'),
  trigger=('Transient gather encounters a fault','瞬态 gather 遇到故障'),source=('Stale vector-related state','陈旧向量相关状态'),formal=('Apply gather completion/fault rules','按 gather 完成 / 故障规则处理'),transient=('A lane may receive stale value 99','某 lane 可能暂时收到旧值 99'),
@@ -405,8 +392,8 @@ WALKTHROUGHS={
 'lvi':('Follow both [01] and [02] inside the victim. In [05] the victim computes with the wrong operand; the observer has not yet obtained a secret. If [04] forwards nothing, this particular dependent computation cannot use the illustrative zero early.','[01]、[02] 都在受害者内部。[05] 是受害者用错操作数，观察者此时并未得到秘密。如果 [04] 不转发任何值，这个依赖运算就不能提前使用教学零值。'),
 'ssb':('Line [05] makes the aliasing relation explicit. Without that overlap, reading 3 is not an error. The difference between [04] and [06] is the value of the same location, not a sample from unrelated work.','[05] 明确了别名关系，没有重叠时读取 3 不是错误。[04]、[06] 的差别来自同一位置的新旧值，不是无关工作的样本。'),
  'taa':('The tentative counter value in [02], unrelated sample in [04] and committed value in [05] are deliberately different. Rolling back 6 establishes transaction semantics; it does not prove that the sample left no observable effect.','[02] 的暂定 counter、[04] 的无关样本和 [05] 的正式值被有意设为不同数值。回滚 6 证明事务语义，不证明样本没有留下可观察影响。'),
-'bhi':('Between [03] and [04], hold [01] and [02] fixed. Only the history context changes. The example isolates a selection effect without claiming a particular hardware table layout or a recipe for generating H_B.','从 [03] 到 [04]，保持 [01]、[02] 不变，只更换历史上下文。例子隔离出选择效应，不声称特定硬件表布局，也不给出生成 H_B 的配方。'),
-'retbleed':('The saved address in [01] remains unchanged in [02] and [06]. What differs is the early prediction at [04]. This is why the model should not be read as a stack-smashing or software-return-address attack.','[01] 保存的地址在 [02]、[06] 中都不变，变化的是 [04] 的提前预测，因此不能把模型读成栈破坏或软件返回地址攻击。'),
+'bhi':('Read [01] as target-state preparation and [04] as history preparation. Compare [03] and [05] with the same J, fp and target state: only the context changes. Candidates are code destinations, not if conditions; the actual fp in [06] never changes.', '[01] 是目标状态准备，[04] 是历史准备。对照 [03] 与 [05]，J、fp 和目标状态不变，只改变上下文。候选项是代码目的地，不是 if 条件；[06] 的真实 fp 从未改变。'),
+'retbleed':('The saved address from [01] remains intact at [04] and [06]. Target training [02] and the affected prediction condition [03] are separate requirements; the Intel and AMD conditions are alternatives, not consecutive steps. G is a code target, not secret data.', '[01] 保存的地址在 [04]、[06] 仍然完整。[02] 的目标训练与 [03] 的受影响预测条件是不同前提；Intel 与 AMD 条件是不同路径，不是连续步骤。G 是代码目标，不是秘密数据。'),
 'gds':('Compare the intended elements in [01] with the old 99 in [03]. A legitimate completed lane in [05] is not this stale sample. The diagram omits real masking and fault-handling details to isolate that distinction.','对比 [01] 的正常元素与 [03] 的旧值 99。[05] 中合法完成的 lane 不等于这个样本。图省略了真实掩码和故障处理细节，以突出这种区别。'),
 'rfds':('OLD in [03] is an internal retained value, not a register name the observer may choose. CURRENT in [05] remains the current context’s valid state. The example explains provenance rather than inventing a trigger instruction.','[03] 的 OLD 是内部保留值，不是可由观察者选择的寄存器名字；[05] 的 CURRENT 仍是当前上下文的有效状态。例子解释来源，不虚构触发指令。'),
 'inception':('Keep [02], [03] and [04] as separate stages. The first transient window can influence predictor state used later. Neither [03] nor [04] means that the saved software return address changed.','将 [02]、[03]、[04] 分成不同阶段。第一个瞬态窗口可影响之后使用的预测状态，[03]、[04] 都不表示软件保存的返回地址被改写。'),

@@ -7,6 +7,7 @@ from collections import Counter
 from case_notes import CASES,SOURCES,WALKTHROUGHS
 from diagram_examples import EXCERPTS
 from case_diagrams import wrap
+from prediction_notes import RELATED, GLOSSARY, DETAILS
 ROOT=Path(__file__).resolve().parent
 class Page(HTMLParser):
  def __init__(self):super().__init__();self.ids=[];self.links=[];self.images=[];self.styles=[];self.sections=[];self.cards=[];self.languages={};self.traces=0;self.a=None
@@ -43,8 +44,18 @@ for zh in (False,True):
  links(index,p)
  for c in CASES:
   path=ROOT/('case-'+c['id']+suffix+'.html');page=parse(path);links(path,page)
-  assert {x for x in page.sections if x}=={'overview','trace','training','boundary','mitigation','contrast','sources'},path.name
-  assert page.traces>=1 and len(page.images)==1
+  expected={'overview','trace','training','boundary','mitigation','contrast','sources'}
+  if c['id'] in RELATED:expected.add('prerequisites')
+  assert {x for x in page.sections if x}==expected,path.name
+  assert page.traces>=1 and len(page.images)==(2 if c['id'] in DETAILS else 1)
+  if c['id'] in RELATED:
+   assert all('concept-'+id in page.ids for id,_,_ in GLOSSARY)
+   assert page.sections.index('prerequisites')<page.sections.index('overview')
+  if c['id'] in {'retbleed','inception'}:assert 'concept-rsb' in page.ids
+  if c['id'] in DETAILS:
+   extra=ET.parse(ROOT/urlsplit(page.images[1]['src']).path)
+   assert extra.getroot().attrib['viewBox']=='0 0 1280 960'
+   for title,body in DETAILS[c['id']]:assert title[1 if zh else 0] in path.read_text()
   assert page.languages=={'en':'case-'+c['id']+'.html','zh':'case-'+c['id']+'.zh.html'}
   text=path.read_text();assert all(SOURCES[k][1] in text for k in c['refs'])
   assert not any(x in text for x in ['/Users/','/var/folders/','xiang/outputs'])
@@ -63,10 +74,10 @@ for zh in (False,True):
    assert code.replace('&','&amp;').replace('<','&lt;').replace('>','&gt;') in text
   assert 'diagram-code' in text
   if ex['cite']:assert ex['cite'][1] in text
- print(lang,'14 guides, one diagram and seven sections each, language/reading/source links PASS')
+ print(lang,'14 guides, prerequisite dependencies, training details, diagrams, language/source links PASS')
 # Rebuild in place and make sure generated output is deterministic.
 files=list(ROOT.glob('case-*.html'))+[ROOT/'cases.html',ROOT/'cases.zh.html']+list((ROOT/'assets/cases').glob('*.svg'))
 before={f:hashlib.sha256(f.read_bytes()).digest() for f in files}
 subprocess.run([sys.executable,str(ROOT/'build_cases.py')],check=True)
 assert all(hashlib.sha256(f.read_bytes()).digest()==h for f,h in before.items()),'Build is not idempotent'
-print('58 generated files deterministic; preserved research/PoC links; local anchors and SVG integrity PASS')
+print(str(len(files))+' generated files deterministic; preserved research/PoC links; local anchors and SVG integrity PASS')
