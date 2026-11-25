@@ -1,0 +1,224 @@
+{
+  "spectre-v1": {
+    "en": [
+      {
+        "href": "https://meltdownattack.com/spectre.pdf",
+        "label": "Original paper ↗"
+      },
+      {
+        "href": "https://github.com/MATCHA-MIT/SHD-StarterCode",
+        "label": "MIT Teaching Experiment ↗"
+      }
+    ],
+    "zh": [
+      {
+        "href": "https://meltdownattack.com/spectre.pdf",
+        "label": "原始论文 ↗"
+      },
+      {
+        "href": "https://github.com/MATCHA-MIT/SHD-StarterCode",
+        "label": "MIT 教学实验 ↗"
+      }
+    ]
+  },
+  "spectre-v2": {
+    "en": [
+      {
+        "href": "https://meltdownattack.com/spectre.pdf",
+        "label": "Original paper ↗"
+      },
+      {
+        "href": "https://www.kernel.org/doc/html/latest/admin-guide/hw-vuln/spectre.html",
+        "label": "Linux Mitigation Documentation ↗"
+      }
+    ],
+    "zh": [
+      {
+        "href": "https://meltdownattack.com/spectre.pdf",
+        "label": "原始论文 ↗"
+      },
+      {
+        "href": "https://www.kernel.org/doc/html/latest/admin-guide/hw-vuln/spectre.html",
+        "label": "Linux 缓解文档 ↗"
+      }
+    ]
+  },
+  "meltdown": {
+    "en": [
+      {
+        "href": "https://meltdownattack.com/meltdown.pdf",
+        "label": "Original paper ↗"
+      },
+      {
+        "href": "https://github.com/IAIK/meltdown",
+        "label": "Research PoC ↗"
+      }
+    ],
+    "zh": [
+      {
+        "href": "https://meltdownattack.com/meltdown.pdf",
+        "label": "原始论文 ↗"
+      },
+      {
+        "href": "https://github.com/IAIK/meltdown",
+        "label": "研究 PoC ↗"
+      }
+    ]
+  },
+  "l1tf": {
+    "en": [
+      {
+        "href": "https://foreshadowattack.eu/",
+        "label": "Research Team ↗"
+      },
+      {
+        "href": "https://www.kernel.org/doc/html/latest/admin-guide/hw-vuln/l1tf.html",
+        "label": "Linux Documentation ↗"
+      }
+    ],
+    "zh": [
+      {
+        "href": "https://foreshadowattack.eu/",
+        "label": "研究团队 ↗"
+      },
+      {
+        "href": "https://www.kernel.org/doc/html/latest/admin-guide/hw-vuln/l1tf.html",
+        "label": "Linux 文档 ↗"
+      }
+    ]
+  },
+  "mds": {
+    "en": [
+      {
+        "href": "https://mdsattacks.com/",
+        "label": "Research Overview ↗"
+      },
+      {
+        "href": "https://github.com/vusec/ridl",
+        "label": "Original author PoC ↗"
+      },
+      {
+        "href": "https://www.kernel.org/doc/html/latest/admin-guide/hw-vuln/mds.html",
+        "label": "Linux Documentation ↗"
+      }
+    ],
+    "zh": [
+      {
+        "href": "https://mdsattacks.com/",
+        "label": "研究总览 ↗"
+      },
+      {
+        "href": "https://github.com/vusec/ridl",
+        "label": "原作者 PoC ↗"
+      },
+      {
+        "href": "https://www.kernel.org/doc/html/latest/admin-guide/hw-vuln/mds.html",
+        "label": "Linux 文档 ↗"
+      }
+    ]
+  },
+  "bhi": {
+    "en": [
+      {
+        "href": "https://www.intel.com/content/www/us/en/developer/articles/technical/software-security-guidance/technical-documentation/branch-history-injection.html",
+        "label": "Intel Technical Guide ↗"
+      },
+      {
+        "href": "https://www.kernel.org/doc/html/latest/admin-guide/hw-vuln/spectre.html",
+        "label": "Linux Documentation ↗"
+      }
+    ],
+    "zh": [
+      {
+        "href": "https://www.intel.com/content/www/us/en/developer/articles/technical/software-security-guidance/technical-documentation/branch-history-injection.html",
+        "label": "Intel 技术指导 ↗"
+      },
+      {
+        "href": "https://www.kernel.org/doc/html/latest/admin-guide/hw-vuln/spectre.html",
+        "label": "Linux 文档 ↗"
+      }
+    ]
+  },
+  "gds": {
+    "en": [
+      {
+        "href": "https://downfall.page/media/downfall.pdf",
+        "label": "Original paper ↗"
+      },
+      {
+        "href": "https://github.com/flowyroll/downfall/tree/main/POC",
+        "label": "Original author PoC ↗"
+      },
+      {
+        "href": "https://www.kernel.org/doc/html/latest/admin-guide/hw-vuln/gather_data_sampling.html",
+        "label": "Linux Documentation ↗"
+      }
+    ],
+    "zh": [
+      {
+        "href": "https://downfall.page/media/downfall.pdf",
+        "label": "原始论文 ↗"
+      },
+      {
+        "href": "https://github.com/flowyroll/downfall/tree/main/POC",
+        "label": "原作者 PoC ↗"
+      },
+      {
+        "href": "https://www.kernel.org/doc/html/latest/admin-guide/hw-vuln/gather_data_sampling.html",
+        "label": "Linux 文档 ↗"
+      }
+    ]
+  },
+  "inception": {
+    "en": [
+      {
+        "href": "https://www.amd.com/en/resources/product-security/bulletin/amd-sb-7005.html",
+        "label": "AMD Announcement ↗"
+      },
+      {
+        "href": "https://comsec.ethz.ch/research/microarch/inception/",
+        "label": "Original research ↗"
+      },
+      {
+        "href": "https://www.kernel.org/doc/html/latest/admin-guide/hw-vuln/srso.html",
+        "label": "Linux Documentation ↗"
+      }
+    ],
+    "zh": [
+      {
+        "href": "https://www.amd.com/en/resources/product-security/bulletin/amd-sb-7005.html",
+        "label": "AMD 公告 ↗"
+      },
+      {
+        "href": "https://comsec.ethz.ch/research/microarch/inception/",
+        "label": "原始研究 ↗"
+      },
+      {
+        "href": "https://www.kernel.org/doc/html/latest/admin-guide/hw-vuln/srso.html",
+        "label": "Linux 文档 ↗"
+      }
+    ]
+  },
+  "zenbleed": {
+    "en": [
+      {
+        "href": "https://www.amd.com/en/resources/product-security/bulletin/amd-sb-7008.html",
+        "label": "AMD Announcement ↗"
+      },
+      {
+        "href": "https://github.com/google/security-research/blob/master/pocs/cpus/zenbleed/README.md",
+        "label": "Original research ↗"
+      }
+    ],
+    "zh": [
+      {
+        "href": "https://www.amd.com/en/resources/product-security/bulletin/amd-sb-7008.html",
+        "label": "AMD 公告 ↗"
+      },
+      {
+        "href": "https://github.com/google/security-research/blob/master/pocs/cpus/zenbleed/README.md",
+        "label": "原始研究 ↗"
+      }
+    ]
+  }
+}
