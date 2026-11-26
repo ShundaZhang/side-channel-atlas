@@ -8,6 +8,7 @@ from case_notes import CASES,SOURCES,WALKTHROUGHS
 from diagram_examples import EXCERPTS
 from case_diagrams import wrap
 from prediction_notes import RELATED, GLOSSARY, DETAILS
+from session_lessons import CASES_WITH_LESSONS
 ROOT=Path(__file__).resolve().parent
 class Page(HTMLParser):
  def __init__(self):super().__init__();self.ids=[];self.links=[];self.images=[];self.styles=[];self.sections=[];self.cards=[];self.languages={};self.traces=0;self.a=None
@@ -46,6 +47,7 @@ for zh in (False,True):
   path=ROOT/('case-'+c['id']+suffix+'.html');page=parse(path);links(path,page)
   expected={'overview','trace','training','boundary','mitigation','contrast','sources'}
   if c['id'] in RELATED:expected.add('prerequisites')
+  if c['id'] in CASES_WITH_LESSONS:expected.add('worked-models')
   assert {x for x in page.sections if x}==expected,path.name
   assert page.traces>=1 and len(page.images)==(2 if c['id'] in DETAILS else 1)
   if c['id'] in RELATED:
@@ -57,7 +59,13 @@ for zh in (False,True):
    assert extra.getroot().attrib['viewBox']=='0 0 1280 960'
    for title,body in DETAILS[c['id']]:assert title[1 if zh else 0] in path.read_text()
   assert page.languages=={'en':'case-'+c['id']+'.html','zh':'case-'+c['id']+'.zh.html'}
-  text=path.read_text();assert all(SOURCES[k][1] in text for k in c['refs'])
+  text=path.read_text()
+  if c['id'] in CASES_WITH_LESSONS:
+   assert 'training_models.js?v=' in text and 'training-models.css?v=' in text
+   assert 'data-training-model=' in text and 'Spectre-RSB / ret2spec' in text
+   assert page.sections.index('training')<page.sections.index('worked-models')<page.sections.index('boundary')
+   assert 'chatgpt-conversation:' not in text and '6b06c53f' not in text
+  assert all(SOURCES[k][1] in text for k in c['refs'])
   assert not any(x in text for x in ['/Users/','/var/folders/','xiang/outputs'])
   for link in legacy.get(c['id'],{}).get(lang,[]):assert link['href'] in index.read_text(),link
   svg=ROOT/urlsplit(page.images[0]['src']).path;tree=ET.parse(svg)

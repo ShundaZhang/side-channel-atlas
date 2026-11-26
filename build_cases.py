@@ -8,6 +8,7 @@ from case_diagrams import make_diagram, WIDTH, HEIGHT
 from diagram_examples import EXCERPTS
 from prediction_notes import RELATED, prerequisites, training_details
 from prediction_diagrams import make_prediction_diagram
+from session_lessons import CASES_WITH_LESSONS, lesson_content
 ROOT=Path(__file__).resolve().parent
 LEGACY=json.loads((ROOT/'case_original_links.json').read_text())
 
@@ -35,9 +36,12 @@ def main():
     return re.sub(r'href="[^\"]*"','href="'+href(c,which)+'"',tag)
    head=re.sub(r'<a\b[^>]*data-atlas-lang="(?:en|zh)"[^>]*>',language_link,head)
    head=add_css(head)
+   if c['id'] in CASES_WITH_LESSONS:
+    head=head.replace('</head>','<link rel="stylesheet" href="training-models.css?v='+digest(ROOT/'training-models.css')+'"><script defer src="training_models.js?v='+digest(ROOT/'training_models.js')+'"></script></head>')
    crumb='<nav class="guide-breadcrumb" aria-label="'+t(('Breadcrumb','面包屑导航'))+'"><a href="cases'+suffix+'.html#catalog">'+t(('All vulnerability guides','全部漏洞导读'))+'</a><a href="foundations'+suffix+'.html">'+t(('Mechanism foundations','机制基础'))+'</a><a href="measurement'+suffix+'.html">'+t(('Cache traces and statistics','缓存痕迹与统计'))+'</a></nav>'
    body='<main id="main"><section class="guide-intro"><div class="wrap">'+crumb+'<span class="eyebrow">'+e(str(c['year'])+' / '+c['cve'])+'</span><h1>'+e(name(c))+'</h1>'+p(c['thesis'])+'</div></section>'
    headings=[('overview',('First understand the mechanism','先理解机制')),('trace',('Follow the teaching example','跟着教学例子走一遍')),('training',('What is trained or triggered?','训练 / 输入到底是什么')),('boundary',('Prerequisites and trust boundary','成立前提与信任边界')),('mitigation',('What does the mitigation interrupt?','缓解切断了哪一环')),('contrast',('Do not confuse these concepts','容易混淆的概念')),('sources',('How to read the original material','带着问题读原始资料'))]
+   if c['id'] in CASES_WITH_LESSONS:headings.insert(3,('worked-models',('Worked models and comparisons','具体模型与机制对照')))
    if c['id'] in RELATED:headings.insert(0,('prerequisites',('Prerequisite concepts','前置概念')))
    toc='<aside class="guide-toc"><h2>'+t(('In this guide','本篇导读'))+'</h2><nav aria-label="'+t(('On this page','本页目录'))+'">'+''.join('<a href="#'+id+'">'+t(title)+'</a>' for id,title in headings)+'</nav></aside>'
    body+='<div class="wrap guide-layout">'+toc+'<article class="guide-content">'
@@ -57,6 +61,7 @@ def main():
     example='<div class="case-table" tabindex="0" role="region" aria-label="'+t(('Teaching example comparison','教学例子对照'))+'"><table><thead><tr>'+''.join('<th scope="col">'+e(t(x))+'</th>' for x in ex['headers'])+'</tr></thead><tbody>'+''.join('<tr>'+''.join('<td>'+e(t(x))+'</td>' for x in row)+'</tr>' for row in ex['rows'])+'</tbody></table></div><pre class="case-trace"><code>'+e(t(ex['code']))+'</code></pre>'
    body+=start_key('trace')+example+'<div class="case-model">'+t(('Numbered semantic pseudocode, not a runnable attack. Labels and values are illustrative; it does not configure predictors, manufacture faults or decode secrets. The diagram is conceptual, not a measured timing trace.','编号语义伪代码，不是可运行攻击。标签和数值均为教学设定，不配置预测器、不制造故障，也不解码秘密。图是概念模型，不是实测时序。'))+'</div><pre class="case-trace"><code>'+e(t(c['trace']))+'</code></pre>'+p(WALKTHROUGHS[c['id']])+'</section>'
    for key in ['training','boundary','mitigation']:
+    if key=='boundary':body+=lesson_content(c['id'],zh)
     body+=start_key(key)+p(c[key])
     if key=='training':
      body+=training_details(c,zh)

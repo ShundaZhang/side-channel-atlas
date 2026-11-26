@@ -33,3 +33,9 @@ python3 check_navigation.py
 教学模型区分正式结果与可能的瞬态行为，特别注明 Zenbleed 可产生架构可见错误这一例外。编号片段和虚构数值不构成可运行的利用链，不声称对硬件完成复现。机制与一手资料核验于 2026 年 11 月。
 
 Retbleed / BHI 的前置依赖与训练因果解释保存在 `prediction_notes.py`，双语训练图由 `prediction_diagrams.py` 生成。Spectre V2、BHI、Retbleed、Inception 页面先介绍间接分支、真实 / 预测目标、BTB、BHB 与训练；返回相关页面另补 RSB / 软件栈对照。Retbleed 明确区分 Intel 下溢 / 替代路径与原评估 AMD 类型混淆，不把 BHI 目标关联与历史构造混为一谈。
+
+## 训练机制的具体模型
+
+`session_lessons.py` 整理经过一手资料核对的 BTI / BHI / RSB 具体例子，放在三个相关案例的 `#worked-models`。`training_models.js` / `training-models.css` 提供纯本地浏览器交互：BTI 目标关联与 BHI 上下文选择、8 位教学历史更新、CALL / RET 与有限 RSB 预测项。可执行 `node check_training_models.cjs` 检查确定性模型。
+
+8 位历史是类似 GHR 的教学移位模型，不是真实 BHB 公式；4 项 RSB 的丢弃 / 消费策略也只用于解释预测不足，不代表任何具体 CPU。RISC-V RAS 操作数提示与具体核心是否存在预测隔离缺陷分开描述。讨论原文和聊天标识不发布到网站。
